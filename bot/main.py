@@ -3,7 +3,7 @@ from aiohttp import web
 from .utils.logger import setup_logger
 from .utils.config import settings
 from .handlers.remnawave_handler import handle_remnawave_webhook
-from .handlers.stripe_handler import handle_stripe_webhook
+from .handlers.alert_handler import handle_alert_webhook
 from aiogram import Bot
 
 """
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Роуты для вебхуков
     app.router.add_post("/webhook/remnawave", handle_remnawave_webhook)
-    app.router.add_post("/webhook/stripe", handle_stripe_webhook)
+    app.router.add_post("/webhook/alert/{token}", handle_alert_webhook)
 
     try:
         # Логируем старт
