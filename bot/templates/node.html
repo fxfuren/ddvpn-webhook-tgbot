@@ -1,5 +1,14 @@
-💰 #{{ event }}
+🔔 {% if event == "node.connection_lost" %}❌ #connection_lost{% elif event == "node.connection_restored" %}✅ #connection_restored{% else %}⚠️ #traffic_notify{% endif %}
 ➖➖➖➖➖➖➖➖➖
-📌 Node: {{ nodeName }}
-🏢 Провайдер: {{ providerName }}
-📅 Следующий платёж: {{ nextBillingAt }}
+📌 Node: {{ name }}
+🌐 UUID: {{ uuid }}
+{% if trafficUsedBytes is defined %}
+📊 Использовано трафика: {{ trafficUsedBytes }}
+{% endif %}
+{% if trafficLimitBytes is defined %}
+📦 Лимит трафика: {{ trafficLimitBytes }}
+{% endif %}
+🌍 Страна: {{ countryCode }}
+{% if activeInternalSquads %}
+👥 Внутренние группы: {{ activeInternalSquads | join(', ') }}
+{% endif %}
