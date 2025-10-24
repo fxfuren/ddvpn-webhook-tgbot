@@ -1,14 +1,33 @@
-🔔 {% if event == "node.connection_lost" %}❌ #connection_lost{% elif event == "node.connection_restored" %}✅ #connection_restored{% else %}⚠️ #traffic_notify{% endif %}
+🔔 {% if event == "node.connection_lost" %}
+❌ #connection_lost
+{% elif event == "node.connection_restored" %}
+✅ #connection_restored
+{% else %}
+⚠️ #nodeTrafficNotify
+{% endif %}
 ➖➖➖➖➖➖➖➖➖
-📌 Node: {{ name }}
+
+{% if event != "node.connection_lost" and event != "node.connection_restored" %}
+{% if trafficUsedBytes is defined and trafficLimitBytes is defined %}
+Достигнут лимит трафика
+🌐 {{ (trafficUsedBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ / {{ (trafficLimitBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ
+{% endif %}
+{% endif %}
+
+Имя узла: {{ name }}
+Адрес: {{ address }}
 🌐 UUID: {{ uuid }}
-{% if trafficUsedBytes is defined %}
-📊 Использовано трафика: {{ trafficUsedBytes }}
+
+{% if trafficResetDay is defined %}
+День сброса трафика: {{ trafficResetDay }}
 {% endif %}
-{% if trafficLimitBytes is defined %}
-📦 Лимит трафика: {{ trafficLimitBytes }}
+
+{% if trafficUsedBytes is defined and trafficLimitBytes is defined %}
+Процент: {{ ((trafficUsedBytes / trafficLimitBytes) * 100) | round(0) }} %
 {% endif %}
+
 🌍 Страна: {{ countryCode }}
+
 {% if activeInternalSquads %}
 👥 Внутренние группы: {{ activeInternalSquads | join(', ') }}
 {% endif %}
