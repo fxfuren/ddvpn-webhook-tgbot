@@ -1,9 +1,7 @@
 # ddvpn-webhook-tgbot
 
-Webhook-бот для интеграции **Remnawave** и **Observer** с Telegram.
+Webhook-бот для интеграции **[Remnawave](https://github.com/remnawave/panel)** и **[Observer](https://github.com/0FL01/remnawave-observer)** с Telegram.
 Бот принимает вебхуки о событиях нод, сервисов, платежей и нарушениях пользователей, формирует красиво оформленные уведомления и отправляет их в указанный Telegram-чат.
-
----
 
 ## Функционал
 
@@ -15,12 +13,9 @@ Webhook-бот для интеграции **Remnawave** и **Observer** с Tele
 
 Все уведомления формируются через **Jinja2 шаблоны** (`templates/`) и отправляются в Telegram с красивым оформлением, включая динамический хештег события (`#event_name`).
 
-
 > ⚠️ Список разрешённых событий можно увеличивать или изменять в любой момент, редактируя `config/events.yaml`. Новые события будут автоматически обрабатываться ботом без изменения кода.
 
 > ⚠️ Шаблон сообщений можно менять в папке `templates` без изменения кода бота.
-
----
 
 ### 2. Observer
 
@@ -55,8 +50,6 @@ Webhook-бот для интеграции **Remnawave** и **Observer** с Tele
 Для безопасности можно указывать секретный токен в URL (`/webhook/alert/<ALERT_SECRET>`), чтобы никто посторонний не мог слать фейковые уведомления.
 
 > ⚠️ Изменять шаблоны сообщений можно в папке `templates` - бот будет использовать их автоматически.
-
----
 
 ## Установка
 
@@ -95,8 +88,6 @@ REMNAWAVE_WEBHOOK_SECRET=секрет_для_проверки_подписей
 ALERT_WEBHOOK_SECRET=секрет_для_alerts
 ```
 
----
-
 ## Запуск
 
 ### Локальная разработка (ngrok)
@@ -122,22 +113,73 @@ ALERT_WEBHOOK_URL=https://<ngrok-ссылка>/webhook/alert/<ALERT_SECRET>
 python -m bot.main
 ```
 
-### Развёртывание на VPS с доменом через Docker Compose
+## Развёртывание на VPS с доменом через Docker Compose
 
-1. Настройте домен и вебхуки:
+### 1. Подготовка сертификатов
+
+Перед запуском убедитесь, что у вас есть SSL-сертификаты для вашего домена (например, через Let’s Encrypt) и они находятся на VPS по пути:
 
 ```
-REMNAWAVE_WEBHOOK_URL=https://ваш_домен.com/webhook/remnawave
-ALERT_WEBHOOK_URL=https://ваш_домен.com/webhook/alert/<ALERT_SECRET>
+/etc/letsencrypt/live/<ваш_домен>/fullchain.pem
+/etc/letsencrypt/live/<ваш_домен>/privkey.pem
 ```
 
-2. Соберите и запустите:
+> ⚠️ Сертификаты должны быть созданы заранее.
+
+### 2. Подключение сертификатов к `remnawave-nginx`
+
+Если контейнер `remnawave-nginx` уже существует, добавьте монтирование сертификатов в ваш существующий `docker-compose.yml`:
+
+```yaml
+volumes:
+  - /etc/letsencrypt/live/<ваш_домен>/fullchain.pem:/etc/nginx/ssl/<ваш_домен>/fullchain.pem:ro
+  - /etc/letsencrypt/live/<ваш_домен>/privkey.pem:/etc/nginx/ssl/<ваш_домен>/privkey.pem:ro
+```
+
+### 3. Конфигурация Nginx для сервиса `remnawave-nginx`
+
+Добавьте блок для вашего сервиса в `nginx.conf`:
+
+```nginx
+server {
+    server_name <ваш_домен>;
+
+    listen unix:/dev/shm/nginx.sock ssl proxy_protocol;
+    http2 on;
+
+    ssl_certificate "/etc/nginx/ssl/<ваш_домен>/fullchain.pem";
+    ssl_certificate_key "/etc/nginx/ssl/<ваш_домен>/privkey.pem";
+    ssl_trusted_certificate "/etc/nginx/ssl/<ваш_домен>/fullchain.pem";
+
+    location / {
+        proxy_pass http://127.0.0.1:8080; # Порт, на котором работает ваш сервис
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### 4. Настройка переменных окружения
+
+Установите вебхуки для **remnawave** и **observer-alert**:
 
 ```bash
-docker-compose up -d
+REMNAWAVE_WEBHOOK_URL=https://<ваш_домен>/webhook/remnawave
+ALERT_WEBHOOK_URL=https://<ваш_домен>/webhook/alert/<ALERT_SECRET>
 ```
 
----
+### 5. Применение изменений
+
+Перезапустите `remnawave-nginx`, чтобы применить новые сертификаты и конфигурацию:
+
+```bash
+docker-compose restart remnawave-nginx
+```
+
+Теперь ваш сервис будет работать через SSL на вашем домене через существующий контейнер `remnawave-nginx`.
 
 ## Структура проекта
 
@@ -162,13 +204,8 @@ bot/
 └── requirements.txt
 docker-compose.yml
 Dockerfile
-nginx.conf
 .env.example
-
-
 ```
-
----
 
 ## Особенности
 

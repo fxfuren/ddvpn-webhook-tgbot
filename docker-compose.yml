@@ -1,37 +1,12 @@
 services:
-  telegram-bot:
-    build:
-      context: ./bot
-    container_name: telegram-bot
+  ddvpn-webhook-bot:
+    build: .
+    container_name: ddvpn-webhook-tgbot
     restart: always
-    env_file: .env
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - DOMAIN=${DOMAIN}
-      - PORT=${BOT_INTERNAL_PORT}
-    expose:
-      - '${BOT_INTERNAL_PORT}'
-    networks:
-      - botnet
-
-  bot-nginx:
-    image: nginx:1.28
-    container_name: bot-nginx
-    hostname: bot-nginx
-    restart: always
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt/live/${DOMAIN}/fullchain.pem:/etc/nginx/ssl/${DOMAIN}/fullchain.pem:ro
-      - /etc/letsencrypt/live/${DOMAIN}/privkey.pem:/etc/nginx/ssl/${DOMAIN}/privkey.pem:ro
     network_mode: host
-    depends_on:
-      - telegram-bot
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '30m'
-        max-file: '5'
-
-networks:
-  botnet:
-    driver: bridge
+    command: python3 -m bot.main
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./bot:/opt/app/bot
+    env_file:
+      - .env
