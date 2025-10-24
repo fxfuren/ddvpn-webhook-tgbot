@@ -1,8 +1,17 @@
-🔑 {% if event == "service.panel_started" %}✅ #panel_started{% elif event == "service.login_attempt_failed" %}❌ #login_attempt_failed{% else %}✅ #login_attempt_success{% endif %}
+🔑 {% if event == "service.panel_started" %}
+✅ #panel_started
+{% elif event == "service.login_attempt_failed" %}
+❌ #login_attempt_failed
+{% else %}
+✅ #login_attempt_success
+{% endif %}
+
+{% if event != "service.panel_started" %}
 ➖➖➖➖➖➖➖➖➖
 👥 Пользователь: {{ username }}
 🌐 IP: {{ ip }}
 💻 User Agent: {{ userAgent }}
 {% if description %}
 💬 Описание: {{ description }}
+{% endif %}
 {% endif %}
