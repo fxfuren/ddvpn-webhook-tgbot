@@ -1,33 +1,59 @@
-🔔 {% if event == "node.connection_lost" %}
-❌ #connection_lost
+{% set now = "%d.%m.%Y %H:%M UTC" | format(datetime.utcnow()) %}
+⚙️ <b>Remnawave — Node Alert</b>
+─────────────────────────────
+{% if event == "node.connection_lost" %}
+❌ <b>#connection_lost</b>
+🔌 Соединение с узлом потеряно!
 {% elif event == "node.connection_restored" %}
-✅ #connection_restored
+✅ <b>#connection_restored</b>
+🔄 Соединение с узлом восстановлено!
+{% elif event == "node.traffic_notify" %}
+⚠️ <b>#nodeTrafficNotify</b>
+🚦 Уведомление о трафике
 {% else %}
-⚠️ #nodeTrafficNotify
+📡 <b>#nodeEvent</b>
+Неизвестное событие узла.
 {% endif %}
-➖➖➖➖➖➖➖➖➖
+─────────────────────────────
 
-{% if event != "node.connection_lost" and event != "node.connection_restored" %}
-{% if trafficUsedBytes is defined and trafficLimitBytes is defined %}
-Достигнут лимит трафика
-🌐 {{ (trafficUsedBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ / {{ (trafficLimitBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ
+🖥 <b>Имя узла:</b> {{ name }}
+🌐 <b>Адрес:</b> {{ address }}
+🧭 <b>UUID:</b> {{ uuid }}
+🌍 <b>Страна:</b> {{ countryCode }}
+
+{% if xrayVersion %}
+🧩 <b>XRay версия:</b> {{ xrayVersion }}
 {% endif %}
+{% if xrayUptime %}
+⏳ <b>Uptime:</b> {{ xrayUptime }}
 {% endif %}
-
-Имя узла: {{ name }}
-Адрес: {{ address }}
-🌐 UUID: {{ uuid }}
-
-{% if trafficResetDay is defined %}
-День сброса трафика: {{ trafficResetDay }}
-{% endif %}
-
-{% if trafficUsedBytes is defined and trafficLimitBytes is defined %}
-Процент: {{ ((trafficUsedBytes / trafficLimitBytes) * 100) | round(0) }} %
+{% if usersOnline is not none %}
+👥 <b>Пользователей онлайн:</b> {{ usersOnline }}
 {% endif %}
 
-🌍 Страна: {{ countryCode }}
+{% if trafficUsedBytes and trafficLimitBytes %}
+📊 <b>Трафик:</b> {{ (trafficUsedBytes / 1024 / 1024 / 1024) | round(2) }} / {{ (trafficLimitBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ
+📈 <b>Процент:</b> {{ ((trafficUsedBytes / trafficLimitBytes) * 100) | round(1) }}%
+{% endif %}
+{% if trafficResetDay %}
+🔁 <b>Сброс трафика:</b> {{ trafficResetDay }} день месяца
+{% endif %}
+
+{% if isNodeOnline is not none %}
+🟢 <b>Онлайн:</b> {{ "Да" if isNodeOnline else "Нет" }}
+{% endif %}
+
+{% if cpuModel %}
+🧠 <b>CPU:</b> {{ cpuModel }}
+{% endif %}
+{% if totalRam %}
+💾 <b>RAM:</b> {{ totalRam }}
+{% endif %}
 
 {% if activeInternalSquads %}
-👥 Внутренние группы: {{ activeInternalSquads | join(', ') }}
+👥 <b>Внутренние группы:</b> {{ activeInternalSquads | join(', ') }}
 {% endif %}
+
+─────────────────────────────
+🕐 <i>{{ now }}</i>
+🔗 <b>Remnawave Monitoring</b>

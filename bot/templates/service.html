@@ -1,17 +1,36 @@
-🔑 {% if event == "service.panel_started" %}
-✅ #panel_started
+{% set now = "%d.%m.%Y %H:%M UTC" | format(datetime.utcnow()) %}
+🔑 <b>Remnawave — Service Event</b>
+─────────────────────────────
+{% if event == "service.panel_started" %}
+🟢 <b>#panel_started</b>
+💻 Панель успешно запущена.
+⚙️ Система готова к работе.
 {% elif event == "service.login_attempt_failed" %}
-❌ #login_attempt_failed
+❌ <b>#login_attempt_failed</b>
+🚨 Неудачная попытка входа.
+─────────────────────────────
+👥 <b>Пользователь:</b> {{ username }}
+🌐 <b>IP:</b> {{ ip }}
+💻 <b>User Agent:</b> {{ userAgent }}
+{% if description %}
+💬 <b>Описание:</b> {{ description }}
+{% endif %}
+{% if password %}
+🔑 <b>Пароль:</b> {{ password }}
+{% endif %}
+{% elif event == "service.login_attempt_success" %}
+✅ <b>#login_attempt_success</b>
+👤 Успешный вход в систему.
+─────────────────────────────
+👥 <b>Пользователь:</b> {{ username }}
+🌐 <b>IP:</b> {{ ip }}
+💻 <b>User Agent:</b> {{ userAgent }}
 {% else %}
-✅ #login_attempt_success
+📢 <b>#serviceEvent</b>
+Новый сервисный ивент.
+<pre>{{ data | tojson(indent=2) }}</pre>
 {% endif %}
 
-{% if event != "service.panel_started" %}
-➖➖➖➖➖➖➖➖➖
-👥 Пользователь: {{ username }}
-🌐 IP: {{ ip }}
-💻 User Agent: {{ userAgent }}
-{% if description %}
-💬 Описание: {{ description }}
-{% endif %}
-{% endif %}
+─────────────────────────────
+🕐 <i>{{ now }}</i>
+🔗 <b>Remnawave Service Monitor</b>
