@@ -1,4 +1,4 @@
-{% set now = "%d.%m.%Y %H:%M UTC" | format(datetime.utcnow()) %}
+{% set now = (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M MSK") %}
 🔑 <b>Remnawave — Service Event</b>
 ─────────────────────────────
 {% if event == "service.panel_started" %}

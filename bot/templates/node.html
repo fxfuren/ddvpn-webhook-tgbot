@@ -1,4 +1,4 @@
-{% set now = "%d.%m.%Y %H:%M UTC" | format(datetime.utcnow()) %}
+{% set now = (datetime.utcnow() + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M MSK") %}
 ⚙️ <b>Remnawave — Node Alert</b>
 ─────────────────────────────
 {% if event == "node.connection_lost" %}
@@ -32,8 +32,8 @@
 {% endif %}
 
 {% if trafficUsedBytes and trafficLimitBytes %}
-📊 <b>Трафик:</b> {{ (trafficUsedBytes / 1024 / 1024 / 1024) | round(2) }} / {{ (trafficLimitBytes / 1024 / 1024 / 1024) | round(2) }} ГиБ
-📈 <b>Процент:</b> {{ ((trafficUsedBytes / trafficLimitBytes) * 100) | round(1) }}%
+📊 <b>Трафик:</b> {{ ((trafficUsedBytes | int) / 1024 / 1024 / 1024) | round(2) }} / {{ ((trafficLimitBytes | int) / 1024 / 1024 / 1024) | round(2) }} ГиБ
+📈 <b>Процент:</b> {{ (((trafficUsedBytes | int) / (trafficLimitBytes | int)) * 100) | round(1) }}%
 {% endif %}
 {% if trafficResetDay %}
 🔁 <b>Сброс трафика:</b> {{ trafficResetDay }} день месяца
